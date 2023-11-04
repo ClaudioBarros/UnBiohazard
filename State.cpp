@@ -34,6 +34,14 @@ bool State::QuitRequested()
 
 void State::LoadAssets()
 {
+    //add background
+    GameObject* bgObj = new GameObject();
+    Sprite2* bg = new Sprite2(*bgObj, getAbsPath("/assets/img/map/bg_ceubinho.png"));
+    bg->SetScale(1.5f, 1.5f);
+    bgObj->AddComponent(bg);
+    bgObj->m_pos = Vec2(0.0f, 0.0f);
+    AddObject(bgObj);
+   
     //add player
     GameObject* playerObj = new GameObject();
     Player* player = new Player(*playerObj);
