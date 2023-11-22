@@ -13,6 +13,7 @@
 #include "CameraFollower.h"
 #include "Collider.h"
 #include "Player.h"
+#include "Wall.h"
 #include <algorithm>
 #include <set>
 
@@ -41,6 +42,13 @@ void State::LoadAssets()
     bgObj->AddComponent(bg);
     bgObj->m_pos = Vec2(0.0f, 0.0f);
     AddObject(bgObj);
+
+    //add wall 
+    GameObject* wallObj = new GameObject();
+    Vec2 wallDim(50.0f , 50.0f);
+    Vec2 wallPos = Vec2(200.0f, 200.0f);
+    Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+    AddObject(wallObj);
    
     //add player
     GameObject* playerObj = new GameObject();

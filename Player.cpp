@@ -5,6 +5,7 @@
 #include "InputManager.h"
 #include "Camera.h"
 #include "Collider.h"
+#include "Wall.h"
 
 
 Player::Player(GameObject& associated) : Component(associated)
@@ -326,5 +327,14 @@ bool Player::Is(std::string type)
     return (type == "Player");
 }
 
-void Player::NotifyCollision(GameObject& other){}
+void Player::NotifyCollision(GameObject& other)
+{
+    Wall* w = (Wall*) other.GetComponent("Wall");
+
+    if(w != nullptr)
+    {
+        printf("Collision: Player - Wall\n");
+    }
+}
+
 
