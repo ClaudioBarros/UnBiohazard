@@ -6,10 +6,15 @@
 
 #define PLAYER_SPEED 100
 
+#define SPEED_HISTORY_COUNT 64 
+
 struct Player : Component
 {
     Vec2 m_speedVec;
     bool m_flip;
+
+    Vec2 m_speedHistory[SPEED_HISTORY_COUNT];
+    int m_speedHistoryIndex = 0;
     
     Sprite2* m_sptIdleUp;
     Sprite2* m_sptIdleDown;
@@ -42,7 +47,9 @@ struct Player : Component
     Sprite2* m_sptAttackRight;
 
     enum Direction {UP, DOWN, LEFT, RIGHT};
-    Direction m_direction;
+    Direction m_renderDirection;
+
+    Direction m_direction[2]; 
 
     Player(GameObject& associated);
     Player();
@@ -53,6 +60,6 @@ struct Player : Component
     void NotifyCollision(GameObject& other);
 
 private:
-
     void TurnOffSpriteRendering();
+
 };

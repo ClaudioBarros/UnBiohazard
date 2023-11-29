@@ -16,6 +16,7 @@
 #include "Wall.h"
 #include <algorithm>
 #include <set>
+#include "cute_tiled.h"
 
 State::State()
 {
@@ -43,9 +44,12 @@ void State::LoadAssets()
     bgObj->m_pos = Vec2(0.0f, 0.0f);
     AddObject(bgObj);
 
+    std::string tiledMap = getAbsPath("/assets/map/testmap.tmj");
+    cute_tiled_map_t* map = cute_tiled_load_map_from_file(tiledMap.c_str(), nullptr);
+
     //add wall 
     GameObject* wallObj = new GameObject();
-    Vec2 wallDim(50.0f , 50.0f);
+    Vec2 wallDim(150.0f , 150.0f);
     Vec2 wallPos = Vec2(200.0f, 200.0f);
     Wall* wall = new Wall(*wallObj, wallDim, wallPos);
     AddObject(wallObj);

@@ -1,5 +1,9 @@
 #include "TileMap.h"
 #include "TileSet.h"
+
+#define CUTE_TILED_IMPLEMENTATION
+#include "cute_tiled.h"
+
 #include <fstream>
 #include <string>
 #include <cstring> 
@@ -16,6 +20,12 @@ TileMap::TileMap(GameObject& associated,
 
 void TileMap::Load(std::string file)
 {
+    //load map from Tiled
+    std::string tiledMap = getAbsPath("/assets/tiled_test_tiled.tsj");
+    cute_tiled_map_t* map = cute_tiled_load_map_from_file(tiledMap.c_str(), (int*)0);
+    //--------------
+
+
     std::string filepath= file; 
     std::fstream fs(filepath, std::ios::in);
     if(!fs.is_open())

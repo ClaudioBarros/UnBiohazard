@@ -144,9 +144,13 @@ Player::Player(GameObject& associated) : Component(associated)
     m_associated.AddComponent(collider);
 
     //members
-    m_direction = DOWN;
+    m_renderDirection = DOWN;
     m_speedVec = Vec2(0.0f, 0.0f);
     m_flip = false;
+    for(int i = 0; i < SPEED_HISTORY_COUNT; i++)
+    {
+        m_speedHistory[i] = Vec2(0.0f, 0.0f);
+    }
 }
 
 void Player::Start(){}
@@ -189,7 +193,7 @@ void Player::Update(float dt)
 {
     TurnOffSpriteRendering();
 
-    switch(m_direction)
+    switch(m_renderDirection)
     {
         case UP:
         {
@@ -236,7 +240,9 @@ void Player::Update(float dt)
         skipHorizontalMovement = true; 
         m_sptWalkRight->m_isRendering = true;
         m_speedVec = speed * normalize(Vec2(1.0f, -1.0f));
-        m_direction = RIGHT;
+        m_renderDirection = RIGHT;
+        m_direction[0] = RIGHT;
+        m_direction[1] = UP;
     }
 
     //Move Up-Left
@@ -248,7 +254,9 @@ void Player::Update(float dt)
         skipHorizontalMovement = true; 
         m_sptWalkLeft->m_isRendering = true;
         m_speedVec = speed * normalize(Vec2(-1.0f, -1.0f));
-        m_direction = LEFT;
+        m_renderDirection = LEFT;
+        m_direction[0] = LEFT;
+        m_direction[1] = UP;
     }
 
     //Move Down-Right
@@ -260,7 +268,9 @@ void Player::Update(float dt)
         skipHorizontalMovement = true; 
         m_sptWalkRight->m_isRendering = true;
         m_speedVec = speed * normalize(Vec2(1.0f, 1.0f));
-        m_direction = RIGHT;
+        m_renderDirection = RIGHT;
+        m_direction[0] = RIGHT;
+        m_direction[1] = DOWN;
     }
 
     //Move Down-Left
@@ -272,7 +282,9 @@ void Player::Update(float dt)
         skipHorizontalMovement = true; 
         m_sptWalkLeft->m_isRendering = true;
         m_speedVec = speed * normalize(Vec2(-1.0f, 1.0f));
-        m_direction = LEFT;
+        m_renderDirection = LEFT;
+        m_direction[0] = LEFT;
+        m_direction[1] = DOWN;
     }
 
     //Move Up
@@ -282,7 +294,8 @@ void Player::Update(float dt)
         TurnOffSpriteRendering();
         m_sptWalkUp->m_isRendering = true;
         m_speedVec = Vec2(0.0f, -speed);
-        m_direction = UP;
+        m_renderDirection = UP;
+        m_direction[1] = UP;
     }
     
     //Move Down
@@ -292,7 +305,8 @@ void Player::Update(float dt)
         TurnOffSpriteRendering();
         m_sptWalkDown->m_isRendering = true;
         m_speedVec = Vec2(0.0f, speed);
-        m_direction = DOWN;
+        m_renderDirection = DOWN;
+        m_direction[1] = DOWN;
     }
 
     //Move Left
@@ -302,7 +316,8 @@ void Player::Update(float dt)
         TurnOffSpriteRendering();
         m_sptWalkLeft->m_isRendering = true;
         m_speedVec = Vec2(-speed, 0.0f);
-        m_direction = LEFT;
+        m_renderDirection = LEFT;
+        m_direction[0] = LEFT;
     }
 
     //Move Right
@@ -312,9 +327,12 @@ void Player::Update(float dt)
         TurnOffSpriteRendering();
         m_sptWalkRight->m_isRendering = true;
         m_speedVec = Vec2(speed, 0.0f);
-        m_direction = RIGHT;
+        m_renderDirection = RIGHT;
+        m_direction[0] = RIGHT;
     }
 
+    m_speedHistory[m_speedHistoryIndex % SPEED_HISTORY_COUNT] = m_speedVec;
+    m_speedHistoryIndex == (m_speedHistoryIndex+1) % SPEED_HISTORY_COUNT;
     m_associated.m_pos += m_speedVec;
 }
 
@@ -327,6 +345,179 @@ bool Player::Is(std::string type)
     return (type == "Player");
 }
 
+void solveWallCollision(GameObject *associated, Collider* playerCollider, Collider* wall, Vec2 speed)
+{
+
+    Player* player = (Player*)associated->GetComponent("Player");
+    Rect& pBox = playerCollider->m_box;
+    Rect& wBox = wall->m_box;
+
+    float pWidth = pBox.z();
+    float pHeight = pBox.w();
+
+    float wallWidth = wBox.z();
+    float wallHeight = wBox.w();
+
+    float pLeftX = pBox.x();
+    float pRightX = pLeftX + pWidth;
+    float pTopY = pBox.y();
+    float pBottomY = pTopY + pHeight;
+
+    float wallLeftX = wBox.x();
+    float wallRightX = wallLeftX + wallWidth;
+    float wallTopY = wBox.y();
+    float wallBottomY = wallTopY + wallHeight;
+
+    //get overlap
+    Vec2 overlap(0.0f, 0.0f);
+    if(pLeftX < wallLeftX)
+    {
+        if(pRightX < wallRightX)
+        {
+            overlap.setX(pRightX - wallLeftX);
+        }
+        else
+        {
+            overlap.setX(wallWidth);
+        }
+    }
+    else //pLeftX >= wallLeftX
+    {
+        if(pRightX > wallRightX)
+        {
+            overlap.setX(wallRightX - pLeftX);
+        }
+        else
+        {
+            overlap.setX(pWidth);
+        }
+    }
+
+    if(pTopY < wallTopY)
+    {
+        if(pBottomY < wallBottomY)
+        {
+            overlap.setY(pBottomY - wallTopY);
+        }
+        else
+        {
+            overlap.setY(wallHeight);
+        }
+    }
+    else //pTopY > wallTopY
+    {
+        if(pBottomY > wallBottomY)
+        {
+            overlap.setY(wallBottomY - pTopY);
+        }
+        else
+        {
+            overlap.setY(pHeight);
+        }
+    }
+
+    //solve collision:
+
+    printf("-------- Wall Collision ----------: \n");
+    printf("\tplayerBoxCoords = (%f , %f, %f , %f)\n", pLeftX, pRightX, pTopY, pBottomY);
+    printf("\twallBoxCoords = (%f , %f, %f , %f)\n", wallLeftX, wallRightX, wallTopY, wallBottomY);
+
+    printf("\toverlap = (%f ; %f)\n", overlap.x(), overlap.y());
+    printf("\tspeed = (%f ; %f)\n", speed.x(), speed.y());
+    if(overlap.x() > overlap.y())
+    {
+        // if(speed.y() == 0)
+        // {
+        //     //get latest recorded Y speed that isn't zero
+        //     int index = player->m_speedHistoryIndex;
+        //     for(int i = 0; i < SPEED_HISTORY_COUNT; i++)
+        //     {
+        //         float y = player->m_speedHistory[index].y();
+        //         if(y != 0)
+        //         {
+        //             speed.setY(y);
+        //         }
+        //         index = (index-1) % SPEED_HISTORY_COUNT;
+        //     }
+        // }
+        // if(speed.y() < 0)
+        if(player->m_direction[1] == Player::Direction::DOWN)
+        {
+            //player is moving down
+            float oldY = pBox.y();
+            float newY = wallTopY - pHeight - 1.0f; 
+            pBox.setY(newY);
+
+            float displacement = fabs(oldY - newY);
+            printf("\t(oldY, newY) : (%f ; %f)\n", oldY, newY);
+            printf("\t oldPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+            associated->m_pos -= Vec2(0.0f, displacement); 
+            printf("\t newPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+        }
+        else
+        {
+            //player is moving up
+            float oldY = pBox.y();
+            float newY = wallBottomY + 1.0f; 
+            pBox.setY(newY);
+
+            float displacement = fabs(oldY - newY);
+            printf("\t(oldY, newY) : (%f ; %f)\n", oldY, newY);
+            printf("\t oldPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+            associated->m_pos += Vec2(0.0f, displacement); 
+            printf("\tnewPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+                
+        }
+    }
+    else
+    {
+        // if(speed.x() == 0)
+        // {
+        //     //get latest recorded X speed that isn't zero
+        //     int index = player->m_speedHistoryIndex;
+        //     for(int i = 0; i < SPEED_HISTORY_COUNT; i++)
+        //     {
+        //         float x = player->m_speedHistory[index].x();
+        //         if(x != 0)
+        //         {
+        //             speed.setX(x);
+        //         }
+        //         index = (index-1) % SPEED_HISTORY_COUNT;
+        //     }
+        // }
+
+        // if(speed.x() > 0)
+        if(player->m_direction[0] == Player::Direction::RIGHT)
+        {
+            //player is moving right
+            float oldX = pBox.x();
+            float newX = wallLeftX - pWidth - 1.0f; 
+            pBox.setX(newX);
+
+            float displacement = fabs(oldX - newX);
+            printf("\t(oldX, newX) : (%f ; %f)\n", oldX, newX);
+            printf("\t oldPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+            associated->m_pos -= Vec2(displacement, 0); 
+            printf("\t newPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+        }
+        else
+        {
+            //player is moving left
+            float oldX = pBox.x();
+            float newX = wallRightX + 1.0f; 
+            pBox.setX(newX);
+
+            float displacement = fabs(oldX - newX);
+            printf("\t(oldX, newX) : (%f ; %f)\n", oldX, newX);
+            printf("\t oldPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+            associated->m_pos += Vec2(displacement, 0); 
+            printf("\t newPos = (%f, %f)\n", associated->m_pos.x(), associated->m_pos.y());
+        }
+    }
+
+    printf("-------------------------------");
+}
+
 void Player::NotifyCollision(GameObject& other)
 {
     Wall* w = (Wall*) other.GetComponent("Wall");
@@ -335,6 +526,10 @@ void Player::NotifyCollision(GameObject& other)
     {
         printf("Collision: Player - Wall\n");
     }
-}
 
+    Collider* playerCollider = (Collider*) m_associated.GetComponent("Collider");
+    Collider* wallCollider = (Collider*) other.GetComponent("Collider");  
+    
+    solveWallCollision(&m_associated, playerCollider, wallCollider, m_speedVec);
+}
 
