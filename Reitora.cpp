@@ -11,10 +11,10 @@
 Reitora::Reitora(GameObject& associated) : Component(associated)
 {
     float idleFrameTime = 0.3;
-    int numIdleFrames = 3;
+    int numIdleFrames = 2;
 
     m_sptIdle = new Sprite2(associated, 
-                    getAbsPath("/assets/img/reitora_parada.png"),
+                    getAbsPath("/assets/img/reitora_atacada.png"),
                     numIdleFrames,
                     idleFrameTime,
                     true);

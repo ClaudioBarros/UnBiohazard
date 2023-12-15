@@ -124,6 +124,22 @@ float Game::GetDeltaTime()
     return m_dt;
 }
 
+// void ShowImage(std::string str, Vec2 scale)
+// {
+//     Camera::m_pos = Vec2(0.0f, 0.0f);
+//     GameObject* obj = new GameObject();
+//     Sprite2* spt = new Sprite2(*obj, str, 1, 1, true); 
+//     spt->SetScale(scale.x(), scale.y());
+//     obj->AddComponent(spt);
+
+//     while(!InputManager::GetInstance().KeyPress(SPACE_KEY))
+//     {
+//         spt->Update(0.0f);
+//         spt->Render(0,0);
+//     }
+//     delete obj;
+// }
+
 void Game::Run()
 {
     m_state = new State();

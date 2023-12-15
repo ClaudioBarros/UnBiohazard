@@ -32,12 +32,12 @@ void Collider::Render()
     dstRect.w = (int) m_box.z(); 
     dstRect.h = (int) m_box.w();;
 
-    SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 0, 0, SDL_ALPHA_OPAQUE);
+ //    SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 0, 0, SDL_ALPHA_OPAQUE);
 
-    SDL_RenderDrawRect(Game::GetInstance().GetRenderer(), &dstRect);
+ //    SDL_RenderDrawRect(Game::GetInstance().GetRenderer(), &dstRect);
 
-    //go back to gray for background rendering 
-	SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 200, 200, 200, SDL_ALPHA_OPAQUE);
+ //    //go back to gray for background rendering 
+	// SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 200, 200, 200, SDL_ALPHA_OPAQUE);
 }
 
 bool Collider::Is(std::string type)

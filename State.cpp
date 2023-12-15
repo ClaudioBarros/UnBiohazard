@@ -115,7 +115,7 @@ void State::LoadAssets()
     GameObject* playerObj = new GameObject();
     Player* player = new Player(*playerObj);
     playerObj->AddComponent(player);
-    playerObj->m_pos = Vec2(SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f);
+    playerObj->m_pos = Vec2(533.0f, 700.0f) *bgScale;
 
     Camera::Follow(AddObject(playerObj));
 
@@ -149,16 +149,15 @@ void State::LoadAssets()
     GameObject* pigeonObj = new GameObject();
     Pigeon* pigeon = new Pigeon(*pigeonObj, 3.0f);
     pigeonObj->AddComponent(pigeon);
-    pigeonObj->m_pos = Vec2(playerObj->m_pos.x() + 100.0f, playerObj->m_pos.y() + 100.0f);
+    pigeonObj->m_pos = Vec2(655.0f, 319.0f);
     AddObject(pigeonObj);
 
     //sarue
     GameObject* sarueObj = new GameObject();
     Sarue* sarue = new Sarue(*sarueObj, 1.5f);
     sarueObj->AddComponent(sarue);
-    sarueObj->m_pos = Vec2(playerObj->m_pos.x() + 200.0f, playerObj->m_pos.y() + 200.0f);
+    sarueObj->m_pos = Vec2(777.0f, 426.0f) * bgScale;
     AddObject(sarueObj);
-
 }
 
 std::weak_ptr<GameObject> State::AddObject(GameObject* go)
