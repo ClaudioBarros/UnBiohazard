@@ -11,13 +11,12 @@
 #include "Timer.h"
 #include "Collider.h"
 
-
-struct Pigeon : Component
+struct Sarue : Component
 {
 private:
 
-    enum PigeonState{MOVING, RESTING};
-    PigeonState m_state;
+    enum SarueState{MOVING, RESTING, SHOOTING};
+    SarueState m_state;
     Timer m_restTimer;
     Vec2 m_destination;
     Vec2 m_speedVec;
@@ -34,16 +33,18 @@ private:
 
     void CheckPlayerHitboxCollision();
 
+    void Shoot(Vec2 target);
+
 public:
 
+    static Sarue* sarue;
+
     int m_hp;
-    std::string type = "Pigeon";
+    std::string type = "Sarue";
     Collider* m_collider; 
 
-    static Pigeon* pigeon;
-
-    Pigeon(GameObject& associated, float restTime);
-    ~Pigeon();
+    Sarue(GameObject& associated, float restTime);
+    ~Sarue();
 
     void Start();
     void Update(float dt);
@@ -51,4 +52,5 @@ public:
     bool Is(std::string type);
     void NotifyCollision(GameObject& other);
 };
+
 

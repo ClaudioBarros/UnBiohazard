@@ -18,6 +18,9 @@
 #include <set>
 #include "cute_tiled.h"
 #include "Pigeon.h"
+#include "Reitora.h"
+#include "Gato.h"
+#include "Sarue.h"
 
 State::State()
 {
@@ -107,7 +110,6 @@ void State::LoadAssets()
         Wall* wall = new Wall(*wallObj, wallDim, wallPos);
         AddObject(wallObj);
     }
-
    
     //add player
     GameObject* playerObj = new GameObject();
@@ -129,12 +131,34 @@ void State::LoadAssets()
     // // statusBarObj->AddComponent(cf);
     // AddObject(statusBarObj);
     
-    //add player
+    //reitora
+    GameObject* reitoraObj = new GameObject();
+    Reitora* reitora = new Reitora(*reitoraObj);
+    reitoraObj->AddComponent(reitora);
+    reitoraObj->m_pos = Vec2(530.0f, 465.0f) * bgScale;
+    AddObject(reitoraObj);
+
+    //Gato
+    GameObject* gatoObj = new GameObject();
+    Gato* gato = new Gato(*gatoObj);
+    gatoObj->AddComponent(gato);
+    gatoObj->m_pos = Vec2(910.0f, 914.0f) * bgScale;
+    AddObject(gatoObj);
+    
+    //test pigeon
     GameObject* pigeonObj = new GameObject();
     Pigeon* pigeon = new Pigeon(*pigeonObj, 3.0f);
     pigeonObj->AddComponent(pigeon);
     pigeonObj->m_pos = Vec2(playerObj->m_pos.x() + 100.0f, playerObj->m_pos.y() + 100.0f);
     AddObject(pigeonObj);
+
+    //sarue
+    GameObject* sarueObj = new GameObject();
+    Sarue* sarue = new Sarue(*sarueObj, 1.5f);
+    sarueObj->AddComponent(sarue);
+    sarueObj->m_pos = Vec2(playerObj->m_pos.x() + 200.0f, playerObj->m_pos.y() + 200.0f);
+    AddObject(sarueObj);
+
 }
 
 std::weak_ptr<GameObject> State::AddObject(GameObject* go)

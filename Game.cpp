@@ -129,7 +129,7 @@ void Game::Run()
     m_state = new State();
 
     m_state->Start();
-
+     
     while(!m_state->QuitRequested())
     {
         SDL_RenderClear(m_renderer);

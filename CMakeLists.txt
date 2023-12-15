@@ -47,6 +47,10 @@ set(SRC_FILES
     "Wall.cpp"
     "Pigeon.cpp"
     "Hitbox.cpp"
+    "Reitora.cpp"
+    "Gato.cpp"
+    "Bullet.cpp"
+    "Sarue.cpp"
     )
 
 add_executable (unbiohazard ${SRC_FILES})

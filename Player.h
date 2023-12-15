@@ -14,6 +14,7 @@ struct Player : Component
 {
     static Player* player;
 
+    int m_hp;
     Vec2 m_speedVec;
     bool m_flip;
 
@@ -58,6 +59,12 @@ struct Player : Component
 
     Direction m_direction[2]; 
 
+    float m_attackTimeSeconds;
+    Timer m_attackTimer;
+    bool m_isAttacking;
+
+    void Shoot(Vec2 target);
+
     Player(GameObject& associated);
     Player();
     void Start();
@@ -65,8 +72,6 @@ struct Player : Component
     void Render();
     bool Is(std::string);
     void NotifyCollision(GameObject& other);
-
-private:
+    void Attack();
     void TurnOffSpriteRendering();
-
 };

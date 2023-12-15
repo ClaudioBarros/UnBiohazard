@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Collider.h"
 #include "Wall.h"
+#include "Bullet.h"
 
 Player* Player::player = nullptr;
 
@@ -14,8 +15,29 @@ Player::Player(GameObject& associated) : Component(associated)
     float scaleX = 2.0f;
     float scaleY = 2.0f;
 
+    // Attack Sprites
+    float attackFrameTime = 0.15;
+    int numAttackFrames = 5;
+
+    m_sptAttackUp = new Sprite2(associated, getAbsPath("/assets/img/player/main/attack_up.png"), numAttackFrames, attackFrameTime, false);
+    m_sptAttackUp->SetScale(scaleX, scaleY);
+
+    m_sptAttackDown = new Sprite2(associated, getAbsPath("/assets/img/player/main/attack_down.png"), numAttackFrames, attackFrameTime, false);
+    m_sptAttackDown->SetScale(scaleX, scaleY);
+
+    m_sptAttackLeft = new Sprite2(associated, getAbsPath("/assets/img/player/main/attack_left.png"), numAttackFrames, attackFrameTime, false);
+    m_sptAttackLeft->SetScale(scaleX, scaleY);
+
+    m_sptAttackRight = new Sprite2(associated, getAbsPath("/assets/img/player/main/attack_right.png"), numAttackFrames, attackFrameTime, false);
+    m_sptAttackRight->SetScale(scaleX, scaleY);
+
+    m_associated.AddComponent(m_sptAttackUp);
+    m_associated.AddComponent(m_sptAttackDown);
+    m_associated.AddComponent(m_sptAttackLeft);
+    m_associated.AddComponent(m_sptAttackRight);
+
     // Idle Sprites
-    float idleFrameTime = 0.2;
+    float idleFrameTime = 0.1;
     int numIdleFrames = 6;
 
     m_sptIdleUp = new Sprite2(associated, getAbsPath("/assets/img/player/main/idle_up.png"), numIdleFrames, idleFrameTime, true);
@@ -36,7 +58,7 @@ Player::Player(GameObject& associated) : Component(associated)
     m_associated.AddComponent(m_sptIdleRight);
 
     // Walk Sprites
-    float walkFrameTime = 0.2;
+    float walkFrameTime = 0.1;
     int numWalkFrames = 6;
 
     m_sptWalkUp = new Sprite2(associated, getAbsPath("/assets/img/player/main/walk_up.png"), numWalkFrames, walkFrameTime, false);
@@ -119,27 +141,6 @@ Player::Player(GameObject& associated) : Component(associated)
     m_associated.AddComponent(m_sptDeathLeft);
     m_associated.AddComponent(m_sptDeathRight);
 
-    // Attack Sprites
-    float attackFrameTime = 0.2;
-    int numAttackFrames = 4;
-
-    m_sptAttackUp = new Sprite2(associated, getAbsPath("/assets/img/player/attack_up.png"), numAttackFrames, attackFrameTime, false);
-    m_sptAttackUp->SetScale(scaleX, scaleY);
-
-    m_sptAttackDown = new Sprite2(associated, getAbsPath("/assets/img/player/attack_down.png"), numAttackFrames, attackFrameTime, false);
-    m_sptAttackDown->SetScale(scaleX, scaleY);
-
-    m_sptAttackLeft = new Sprite2(associated, getAbsPath("/assets/img/player/attack_left.png"), numAttackFrames, attackFrameTime, false);
-    m_sptAttackLeft->SetScale(scaleX, scaleY);
-
-    m_sptAttackRight = new Sprite2(associated, getAbsPath("/assets/img/player/attack_right.png"), numAttackFrames, attackFrameTime, false);
-    m_sptAttackRight->SetScale(scaleX, scaleY);
-
-    m_associated.AddComponent(m_sptAttackUp);
-    m_associated.AddComponent(m_sptAttackDown);
-    m_associated.AddComponent(m_sptAttackLeft);
-    m_associated.AddComponent(m_sptAttackRight);
-
 
     //Collider
     m_collider = new Collider(associated);
@@ -165,6 +166,11 @@ Player::Player(GameObject& associated) : Component(associated)
     {
         m_speedHistory[i] = Vec2(0.0f, 0.0f);
     }
+    m_attackTimeSeconds = attackFrameTime * numAttackFrames;
+    m_attackTimer.time = 0;
+    m_isAttacking = false;
+
+    m_hp = 1000;
 
     player = this;
 }
@@ -204,6 +210,62 @@ void Player::TurnOffSpriteRendering()
     m_sptAttackRight->m_isRendering = false;
 }
 
+void Player::Shoot(Vec2 target)
+{
+    Vec2 pos = getRectCenter(m_associated.m_box); 
+
+    GameObject* obj = new GameObject();
+    obj->m_pos = pos;
+    Vec2 dir = target - pos;
+    float angle = atan2(dir.y(), dir.x());
+    obj->m_angleDeg = RAD2DEG(angle);
+
+    float bulletSpeed = 300.0f;
+    float bulletDamage = 100; 
+    float bulletMaxDist = 100.0f;
+    float bulletFrameCount = 3;
+    float bulletFrameTime = 0.3;
+    bool  targetsPlayer = false;
+    Bullet* bullet = new Bullet(
+        *obj, 
+        targetsPlayer,
+        angle,
+        bulletSpeed,
+        bulletDamage,
+        bulletMaxDist,
+        bulletFrameCount,
+        bulletFrameTime,
+        getAbsPath("/assets/img/minionbullet2.png")
+    );
+
+    obj->AddComponent(bullet);
+
+    Game::GetInstance().GetState().AddObject(obj);
+}
+
+void Player::Attack()
+{
+    switch(m_renderDirection)
+    {
+        case UP:
+        {
+            m_sptAttackUp->m_isRendering = true;            
+        } break;
+        case DOWN:
+        {
+            m_sptAttackDown->m_isRendering = true;            
+        } break;
+        case LEFT:
+        {
+            m_sptAttackLeft->m_isRendering = true;            
+        } break;
+        case RIGHT:
+        {
+            m_sptAttackRight->m_isRendering = true;            
+        } break;
+    }
+    
+}
 
 void Player::Update(float dt)
 {
@@ -347,10 +409,39 @@ void Player::Update(float dt)
         m_direction[0] = RIGHT;
     }
 
+    if(InputManager::GetInstance().MousePress(LEFT_MOUSE_BUTTON))
+    {
+        if(!m_isAttacking) //if previous attack is not still happening
+        {
+            m_isAttacking = true;
+            m_attackTimer.Restart();
+            float mouseX = (float) InputManager::GetInstance().GetMouseX();
+            float mouseY = (float) InputManager::GetInstance().GetMouseY();
+            Vec2 mouseVec = Camera::m_pos + Vec2(mouseX, mouseY);
+            Shoot(mouseVec);
+        }
+    }
+
+    if(m_isAttacking)
+    {
+        m_attackTimer.Update(dt);
+        if(m_attackTimer.time >= m_attackTimeSeconds)
+        {
+            m_isAttacking = false;
+        }
+        else
+        {
+            TurnOffSpriteRendering();
+            Attack();
+        }
+    }
+    if(m_attackTimeSeconds)
+
     m_speedHistory[m_speedHistoryIndex % SPEED_HISTORY_COUNT] = m_speedVec;
     m_speedHistoryIndex = (m_speedHistoryIndex+1) % SPEED_HISTORY_COUNT;
     m_associated.m_pos += m_speedVec;
 }
+
 
 void Player::Render()
 {

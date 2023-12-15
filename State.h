@@ -20,6 +20,7 @@ public:
 
     std::weak_ptr<GameObject> AddObject(GameObject* go);
     std::weak_ptr<GameObject> GetObjectPtr(GameObject* go);
+
     void Start();
     void LoadAssets();
     void Update(float dt);

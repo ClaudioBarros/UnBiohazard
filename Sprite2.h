@@ -21,8 +21,8 @@ private:
     unsigned m_frameWidth;
     unsigned m_frameHeight;
     float m_frameTime;
-    // float m_secondsToSelfDestruct;
-    // Timer m_selfDestructCount;
+    float m_secondsToStop;
+    Timer m_stopCount;
 
 public: 
     bool m_flipTexture = false;

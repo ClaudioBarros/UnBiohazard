@@ -1,4 +1,4 @@
-#include "Pigeon.h"
+#include "Sarue.h"
 #include "Player.h"
 #include "Sprite2.h"
 #include "Camera.h"
@@ -7,40 +7,41 @@
 #include "Collider.h"
 #include "Sound.h"
 #include "Helper.h"
+#include "Bullet.h"
 
-#define PIGEON_SPEED 250.0f
+#define SARUE_SPEED 400.0f
 
-Pigeon* Pigeon::pigeon = nullptr;
+Sarue* Sarue::sarue = nullptr;
 
-Pigeon::Pigeon(GameObject& associated, float restTime) : Component(associated)
+Sarue::Sarue(GameObject& associated, float restTime) : Component(associated)
 {
-    float idleFrameTime = 0.2;
-    int numIdleFrames = 5;
+    float frameTime = 0.2;
+    int numFrames = 6;
     m_sptIdleLeft = new Sprite2(associated, 
-                    getAbsPath("/assets/img/pombo_parado_esq.png"),
-                    numIdleFrames,
-                    idleFrameTime,
+                    getAbsPath("/assets/img/rato_esquerda.png"),
+                    numFrames,
+                    frameTime,
                     true);
     m_sptIdleRight = new Sprite2(associated, 
-                    getAbsPath("/assets/img/pombo_parado_dir.png"),
-                    numIdleFrames,
-                    idleFrameTime,
+                    getAbsPath("/assets/img/rato_direita.png"),
+                    numFrames,
+                    frameTime,
                     true);
     m_sptMovingLeft = new Sprite2(associated, 
-                      getAbsPath("/assets/img/pombo_voando_esq.png"),
-                      1,
-                      1,
+                      getAbsPath("/assets/img/rato_esquerda.png"),
+                      numFrames,
+                      frameTime,
                       true);
     m_sptMovingRight = new Sprite2(associated, 
-                      getAbsPath("/assets/img/pombo_voando_dir.png"),
-                      1,
-                      1,
+                      getAbsPath("/assets/img/rato_direita.png"),
+                      numFrames,
+                      frameTime,
                       true);
 
-    m_sptIdleLeft->SetScale(3.0f, 3.0f);
-    m_sptIdleRight->SetScale(3.0f, 3.0f);
-    m_sptMovingLeft->SetScale(3.0f, 3.0f);
-    m_sptMovingRight->SetScale(3.0f, 3.0f);
+    m_sptIdleLeft->SetScale(2.0f, 2.0f);
+    m_sptIdleRight->SetScale(2.0f, 2.0f);
+    m_sptMovingLeft->SetScale(2.0f, 2.0f);
+    m_sptMovingRight->SetScale(2.0f, 2.0f);
 
     m_associated.AddComponent(m_sptIdleLeft);
     m_associated.AddComponent(m_sptIdleRight);
@@ -55,17 +56,17 @@ Pigeon::Pigeon(GameObject& associated, float restTime) : Component(associated)
     m_state = RESTING; 
     m_restTime = restTime;
 
-    pigeon = this;
+    sarue = this;
 }
 
-Pigeon::~Pigeon()
+Sarue::~Sarue()
 {
-    pigeon = nullptr;
+    sarue = nullptr;
 }
 
-void Pigeon::Start(){}
+void Sarue::Start(){}
 
-void Pigeon::SetDirection()
+void Sarue::SetDirection()
 {
     if(Player::player->m_associated.m_pos.x() > m_associated.m_pos.x())
         m_direction = RIGHT;
@@ -73,15 +74,12 @@ void Pigeon::SetDirection()
         m_direction = LEFT;
 }
 
-void Pigeon::CheckPlayerHitboxCollision()
+void Sarue::CheckPlayerHitboxCollision()
 {
     Player* p = Player::player;
-    if(!p)
-        return; 
-
     if(IsColliding(m_collider->m_box, Player::player->m_hitbox->m_collider->m_box, 0.0f, 0.0f))
     {
-        printf("Collision: Pigeon - Player \n");
+        printf("Collision: Sarue - Player \n");
 
         Helper::Direction dirX;
         Helper::Direction dirY;
@@ -106,7 +104,40 @@ void Pigeon::CheckPlayerHitboxCollision()
     }
 }
 
-void Pigeon::Update(float dt)
+void Sarue::Shoot(Vec2 target)
+{
+    Vec2 pos = getRectCenter(m_associated.m_box); 
+
+    GameObject* obj = new GameObject();
+    obj->m_pos = pos;
+    Vec2 dir = target - pos;
+    float angle = atan2(dir.y(), dir.x());
+    obj->m_angleDeg = RAD2DEG(angle);
+
+    float bulletSpeed = 300.0f;
+    float bulletDamage = 50; 
+    float bulletMaxDist = 1500.0f;
+    float bulletFrameCount = 3;
+    float bulletFrameTime = 0.3;
+    bool  targetsPlayer = true;
+    Bullet* bullet = new Bullet(
+        *obj, 
+        targetsPlayer,
+        angle,
+        bulletSpeed,
+        bulletDamage,
+        bulletMaxDist,
+        bulletFrameCount,
+        bulletFrameTime,
+        getAbsPath("/assets/img/bullet.png")
+    );
+
+    obj->AddComponent(bullet);
+
+    Game::GetInstance().GetState().AddObject(obj);
+}
+
+void Sarue::Update(float dt)
 {
     SetDirection();
 
@@ -142,7 +173,7 @@ void Pigeon::Update(float dt)
                 m_state = MOVING;
 
                 //calculate speed vec
-                m_speedVec = PIGEON_SPEED * normalize(m_destination - m_associated.m_pos);
+                m_speedVec = SARUE_SPEED * normalize(m_destination - m_associated.m_pos);
             }
             m_restTimer.Restart();
         }
@@ -170,6 +201,12 @@ void Pigeon::Update(float dt)
         {
             m_associated.m_pos = m_destination;
 
+            if(Player::player != nullptr)
+            {
+                Vec2 target = Player::player->m_associated.m_pos;
+                Shoot(target);
+            }
+
             m_state = RESTING;
         }
     }
@@ -178,22 +215,22 @@ void Pigeon::Update(float dt)
 }
 
 
-void Pigeon::Render()
+void Sarue::Render()
 {
          
 }
 
-bool Pigeon::Is(std::string type)
+bool Sarue::Is(std::string type)
 {
-    return (type == "Pigeon");
+    return (type == "Sarue");
 }
 
-void Pigeon::NotifyCollision(GameObject& other)
+void Sarue::NotifyCollision(GameObject& other)
 {
     // Player* p = (Player*) other.GetComponent("Player");
     // if(p != nullptr)
     // {
-    //     printf("Collision: Pigeon - Player \n");
+    //     printf("Collision: Sarue - Player \n");
 
     //     Helper::Direction dirX;
     //     Helper::Direction dirY;
@@ -215,4 +252,5 @@ void Pigeon::NotifyCollision(GameObject& other)
     //                                  m_speedVec);
     // }
 }
+
 
