@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <set>
 #include "cute_tiled.h"
+#include "Pigeon.h"
 
 State::State()
 {
@@ -36,23 +37,77 @@ bool State::QuitRequested()
 
 void State::LoadAssets()
 {
+    Vec2 bgScale(1.5f, 1.5f);
+
     //add background
     GameObject* bgObj = new GameObject();
-    Sprite2* bg = new Sprite2(*bgObj, getAbsPath("/assets/img/map/bg_ceubinho.png"));
-    bg->SetScale(1.5f, 1.5f);
+    Sprite2* bg = new Sprite2(*bgObj, getAbsPath("/assets/map/ceubinho.png"));
+    bg->SetScale(bgScale.x(), bgScale.y());
     bgObj->AddComponent(bg);
     bgObj->m_pos = Vec2(0.0f, 0.0f);
     AddObject(bgObj);
 
-    std::string tiledMap = getAbsPath("/assets/map/testmap.tmj");
-    cute_tiled_map_t* map = cute_tiled_load_map_from_file(tiledMap.c_str(), nullptr);
+    // std::string tiledMap = getAbsPath("/assets/map/testmap.tmj");
+    // cute_tiled_map_t* map = cute_tiled_load_map_from_file(tiledMap.c_str(), nullptr);
 
-    //add wall 
-    GameObject* wallObj = new GameObject();
-    Vec2 wallDim(150.0f , 150.0f);
-    Vec2 wallPos = Vec2(200.0f, 200.0f);
-    Wall* wall = new Wall(*wallObj, wallDim, wallPos);
-    AddObject(wallObj);
+    //add walls 
+    //wall1
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(411.0f, 481.0f) * bgScale;
+        Vec2 wallPos = Vec2(0.0f, 0.0f);
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //wall2
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(561.0f , 481.0f) * bgScale;
+        Vec2 wallPos = Vec2(954.0f, 0.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //wall3
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(404.0f , 264.0f) * bgScale;
+        Vec2 wallPos = Vec2(0.0f, 563.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //wall4 
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(548.0f , 280.0f) * bgScale;
+        Vec2 wallPos = Vec2(969.0f, 563.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //frangao
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(180.0f , 175.0f) * bgScale;
+        Vec2 wallPos = Vec2(669.0f, 1055.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //placa unb 1
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(61.0f , 47.0f) * bgScale;
+        Vec2 wallPos = Vec2(394.0f, 910.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+    //placa unb 2
+    {
+        GameObject* wallObj = new GameObject();
+        Vec2 wallDim = Vec2(30.0f , 150.0f) * bgScale;
+        Vec2 wallPos = Vec2(411.0f, 832.0f) * bgScale;
+        Wall* wall = new Wall(*wallObj, wallDim, wallPos);
+        AddObject(wallObj);
+    }
+
    
     //add player
     GameObject* playerObj = new GameObject();
@@ -61,6 +116,25 @@ void State::LoadAssets()
     playerObj->m_pos = Vec2(SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f);
 
     Camera::Follow(AddObject(playerObj));
+
+    //status bar
+    // GameObject* statusBarObj = new GameObject();
+    // Vec2 statusDim(SCREEN_WIDTH, 0.1f*SCREEN_HEIGHT);
+    // Vec2 statusPos(Camera::m_pos.x(),  Camera::m_pos.y() + (0.2f * SCREEN_HEIGHT));
+    // Sprite2* statusSpt = new Sprite2(*statusBarObj, getAbsPath("/assets/img/statusbar.png"));
+    // // CameraFollower* cf = new CameraFollower(*statusBarObj);
+    // statusBarObj->m_box = Rect(0,0, statusDim.x(), statusDim.y());
+    // statusBarObj->m_pos = statusPos;
+    // statusBarObj->AddComponent(statusSpt);
+    // // statusBarObj->AddComponent(cf);
+    // AddObject(statusBarObj);
+    
+    //add player
+    GameObject* pigeonObj = new GameObject();
+    Pigeon* pigeon = new Pigeon(*pigeonObj, 3.0f);
+    pigeonObj->AddComponent(pigeon);
+    pigeonObj->m_pos = Vec2(playerObj->m_pos.x() + 100.0f, playerObj->m_pos.y() + 100.0f);
+    AddObject(pigeonObj);
 }
 
 std::weak_ptr<GameObject> State::AddObject(GameObject* go)
@@ -97,7 +171,6 @@ void State::Start()
 
     m_started = true;
 }
-
 
 void State::Update(float dt)
 {

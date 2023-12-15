@@ -5,8 +5,8 @@
 #include "Resources.h"
 
 #define GAME_TITLE "UnBiohazard"
-#define SCREEN_WIDTH 1024
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1280 
+#define SCREEN_HEIGHT 720 
 #define MAX_SOUND_CHANNELS 32
 
 struct Game

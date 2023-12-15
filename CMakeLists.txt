@@ -45,6 +45,8 @@ set(SRC_FILES
     "Timer.cpp"
     "Player.cpp"
     "Wall.cpp"
+    "Pigeon.cpp"
+    "Hitbox.cpp"
     )
 
 add_executable (unbiohazard ${SRC_FILES})

@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "GameObject.h"
 #include "Component.h"
+#include "Helper.h"
 #include <string>
 
 struct Collider : Component
@@ -24,4 +25,10 @@ public:
 
     void SetScale(Vec2 scale);
     void SetOffset(Vec2 offset);
+    static void solveWallCollision(Helper::Direction directionX,
+                                   Helper::Direction directionY,
+                                   GameObject *associated, 
+                                   Collider* playerCollider, 
+                                   Collider* wall, 
+                                   Vec2 speed);
 };

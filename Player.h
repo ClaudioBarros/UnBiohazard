@@ -3,13 +3,17 @@
 #include "Vec2.h"
 #include "Component.h"
 #include "Sprite2.h"
+#include "Hitbox.h"
+#include "Wall.h"
 
-#define PLAYER_SPEED 100
+#define PLAYER_SPEED 250
 
 #define SPEED_HISTORY_COUNT 64 
 
 struct Player : Component
 {
+    static Player* player;
+
     Vec2 m_speedVec;
     bool m_flip;
 
@@ -45,6 +49,9 @@ struct Player : Component
     Sprite2* m_sptAttackDown;
     Sprite2* m_sptAttackLeft;
     Sprite2* m_sptAttackRight;
+
+    Collider* m_collider;
+    Hitbox* m_hitbox;
 
     enum Direction {UP, DOWN, LEFT, RIGHT};
     Direction m_renderDirection;

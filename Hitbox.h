@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Component.h"
-#include "Collider.h"
 #include "Sprite2.h"
+#include "Collider.h"
 
-struct Wall : Component
+struct Hitbox : Component
 {
     Collider* m_collider;
-    Wall(GameObject& associated, Vec2 dimensions, Vec2 pos);
-    ~Wall();
+    Hitbox(GameObject& associated,Vec2 pos, Vec2 dimensions, Vec2 scale, Vec2 offset);
+    ~Hitbox();
     void Start();
     void Update(float dt);
     void Render();

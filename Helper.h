@@ -7,3 +7,10 @@
 
 std::string getAbsPath(const char* relative_path);
 
+namespace Helper
+{
+
+enum Direction {UP, DOWN, LEFT, RIGHT};
+
+}
+

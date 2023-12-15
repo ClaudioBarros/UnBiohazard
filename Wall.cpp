@@ -9,8 +9,8 @@ Wall::Wall(GameObject& associated, Vec2 dimensions, Vec2 pos) : Component(associ
                               (uint32_t)dimensions.x(),
                               (uint32_t)dimensions.y());
 
-    Collider* collider = new Collider(associated);
-    m_associated.AddComponent(collider);
+    m_collider = new Collider(associated);
+    m_associated.AddComponent(m_collider);
     m_associated.AddComponent(this);
 }
 

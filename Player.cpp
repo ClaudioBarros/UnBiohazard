@@ -7,26 +7,27 @@
 #include "Collider.h"
 #include "Wall.h"
 
+Player* Player::player = nullptr;
 
 Player::Player(GameObject& associated) : Component(associated)
 {
-    float scaleX = 3.0f;
-    float scaleY = 3.0f;
+    float scaleX = 2.0f;
+    float scaleY = 2.0f;
 
     // Idle Sprites
     float idleFrameTime = 0.2;
-    int numIdleFrames = 4;
+    int numIdleFrames = 6;
 
-    m_sptIdleUp = new Sprite2(associated, getAbsPath("/assets/img/player/idle_up.png"), numIdleFrames, idleFrameTime, true);
+    m_sptIdleUp = new Sprite2(associated, getAbsPath("/assets/img/player/main/idle_up.png"), numIdleFrames, idleFrameTime, true);
     m_sptIdleUp->SetScale(scaleX, scaleY);
 
-    m_sptIdleDown = new Sprite2(associated, getAbsPath("/assets/img/player/idle_down.png"), numIdleFrames, idleFrameTime, true);
+    m_sptIdleDown = new Sprite2(associated, getAbsPath("/assets/img/player/main/idle_down.png"), numIdleFrames, idleFrameTime, true);
     m_sptIdleDown->SetScale(scaleX, scaleY);
 
-    m_sptIdleLeft = new Sprite2(associated, getAbsPath("/assets/img/player/idle_left.png"), numIdleFrames, idleFrameTime, true);
+    m_sptIdleLeft = new Sprite2(associated, getAbsPath("/assets/img/player/main/idle_left.png"), numIdleFrames, idleFrameTime, true);
     m_sptIdleLeft->SetScale(scaleX, scaleY);
 
-    m_sptIdleRight = new Sprite2(associated, getAbsPath("/assets/img/player/idle_right.png"), numIdleFrames, idleFrameTime, true);
+    m_sptIdleRight = new Sprite2(associated, getAbsPath("/assets/img/player/main/idle_right.png"), numIdleFrames, idleFrameTime, true);
     m_sptIdleRight->SetScale(scaleX, scaleY);
 
     m_associated.AddComponent(m_sptIdleUp);
@@ -36,18 +37,18 @@ Player::Player(GameObject& associated) : Component(associated)
 
     // Walk Sprites
     float walkFrameTime = 0.2;
-    int numWalkFrames = 4;
+    int numWalkFrames = 6;
 
-    m_sptWalkUp = new Sprite2(associated, getAbsPath("/assets/img/player/walk_up.png"), numWalkFrames, walkFrameTime, false);
+    m_sptWalkUp = new Sprite2(associated, getAbsPath("/assets/img/player/main/walk_up.png"), numWalkFrames, walkFrameTime, false);
     m_sptWalkUp->SetScale(scaleX, scaleY);
 
-    m_sptWalkDown = new Sprite2(associated, getAbsPath("/assets/img/player/walk_down.png"), numWalkFrames, walkFrameTime, false);
+    m_sptWalkDown = new Sprite2(associated, getAbsPath("/assets/img/player/main/walk_down.png"), numWalkFrames, walkFrameTime, false);
     m_sptWalkDown->SetScale(scaleX, scaleY);
 
-    m_sptWalkLeft = new Sprite2(associated, getAbsPath("/assets/img/player/walk_left.png"), numWalkFrames, walkFrameTime, false);
+    m_sptWalkLeft = new Sprite2(associated, getAbsPath("/assets/img/player/main/walk_left.png"), numWalkFrames, walkFrameTime, false);
     m_sptWalkLeft->SetScale(scaleX, scaleY);
 
-    m_sptWalkRight = new Sprite2(associated, getAbsPath("/assets/img/player/walk_right.png"), numWalkFrames, walkFrameTime, false);
+    m_sptWalkRight = new Sprite2(associated, getAbsPath("/assets/img/player/main/walk_right.png"), numWalkFrames, walkFrameTime, false);
     m_sptWalkRight->SetScale(scaleX, scaleY);
 
     m_associated.AddComponent(m_sptWalkUp);
@@ -139,9 +140,22 @@ Player::Player(GameObject& associated) : Component(associated)
     m_associated.AddComponent(m_sptAttackLeft);
     m_associated.AddComponent(m_sptAttackRight);
 
+
     //Collider
-    Collider* collider = new Collider(associated);
-    m_associated.AddComponent(collider);
+    m_collider = new Collider(associated);
+    m_associated.AddComponent(m_collider);
+    m_collider->SetScale(Vec2(0.6f, 0.8f));
+    m_collider->SetOffset(Vec2(20.0f, 60.0f));
+    // collider->SetOffset(Vec2(0.3f * m_associated.m_box.z(), 
+    //                          0.7f * m_associated.m_box.w()));
+    
+    //Hitbox
+    m_hitbox = new Hitbox(associated, 
+                          m_associated.m_pos,
+                          Vec2(m_associated.m_box.z(), m_associated.m_box.w()),
+                          Vec2(0.8f, 1.8f),
+                          Vec2(12.0f, 0.0f));
+                         
 
     //members
     m_renderDirection = DOWN;
@@ -151,6 +165,8 @@ Player::Player(GameObject& associated) : Component(associated)
     {
         m_speedHistory[i] = Vec2(0.0f, 0.0f);
     }
+
+    player = this;
 }
 
 void Player::Start(){}
@@ -332,7 +348,7 @@ void Player::Update(float dt)
     }
 
     m_speedHistory[m_speedHistoryIndex % SPEED_HISTORY_COUNT] = m_speedVec;
-    m_speedHistoryIndex == (m_speedHistoryIndex+1) % SPEED_HISTORY_COUNT;
+    m_speedHistoryIndex = (m_speedHistoryIndex+1) % SPEED_HISTORY_COUNT;
     m_associated.m_pos += m_speedVec;
 }
 
@@ -426,21 +442,6 @@ void solveWallCollision(GameObject *associated, Collider* playerCollider, Collid
     printf("\tspeed = (%f ; %f)\n", speed.x(), speed.y());
     if(overlap.x() > overlap.y())
     {
-        // if(speed.y() == 0)
-        // {
-        //     //get latest recorded Y speed that isn't zero
-        //     int index = player->m_speedHistoryIndex;
-        //     for(int i = 0; i < SPEED_HISTORY_COUNT; i++)
-        //     {
-        //         float y = player->m_speedHistory[index].y();
-        //         if(y != 0)
-        //         {
-        //             speed.setY(y);
-        //         }
-        //         index = (index-1) % SPEED_HISTORY_COUNT;
-        //     }
-        // }
-        // if(speed.y() < 0)
         if(player->m_direction[1] == Player::Direction::DOWN)
         {
             //player is moving down
@@ -471,21 +472,6 @@ void solveWallCollision(GameObject *associated, Collider* playerCollider, Collid
     }
     else
     {
-        // if(speed.x() == 0)
-        // {
-        //     //get latest recorded X speed that isn't zero
-        //     int index = player->m_speedHistoryIndex;
-        //     for(int i = 0; i < SPEED_HISTORY_COUNT; i++)
-        //     {
-        //         float x = player->m_speedHistory[index].x();
-        //         if(x != 0)
-        //         {
-        //             speed.setX(x);
-        //         }
-        //         index = (index-1) % SPEED_HISTORY_COUNT;
-        //     }
-        // }
-
         // if(speed.x() > 0)
         if(player->m_direction[0] == Player::Direction::RIGHT)
         {
@@ -525,11 +511,11 @@ void Player::NotifyCollision(GameObject& other)
     if(w != nullptr)
     {
         printf("Collision: Player - Wall\n");
+        Collider* playerCollider = (Collider*) m_associated.GetComponent("Collider");
+        Collider* wallCollider = (Collider*) other.GetComponent("Collider");  
+        
+        solveWallCollision(&m_associated, playerCollider, wallCollider, m_speedVec);
     }
 
-    Collider* playerCollider = (Collider*) m_associated.GetComponent("Collider");
-    Collider* wallCollider = (Collider*) other.GetComponent("Collider");  
-    
-    solveWallCollision(&m_associated, playerCollider, wallCollider, m_speedVec);
 }
 
