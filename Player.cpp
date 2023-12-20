@@ -235,7 +235,7 @@ void Player::Shoot(Vec2 target)
         bulletMaxDist,
         bulletFrameCount,
         bulletFrameTime,
-        getAbsPath("/assets/img/minionbullet2.png")
+        getAbsPath("/assets/img/player_bullet.png")
     );
 
     obj->AddComponent(bullet);

@@ -158,6 +158,10 @@ void State::LoadAssets()
     sarueObj->AddComponent(sarue);
     sarueObj->m_pos = Vec2(777.0f, 426.0f) * bgScale;
     AddObject(sarueObj);
+
+    //add music
+    Music* music = new Music(getAbsPath("/assets/audio/musica_combate.mp3"));
+    music->Play();
 }
 
 std::weak_ptr<GameObject> State::AddObject(GameObject* go)
